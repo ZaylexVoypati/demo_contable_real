@@ -1,0 +1,19 @@
+{
+  "name": "demo-contable-real-voypati",
+  "version": "1.0.0",
+  "description": "Demo de la realidad contable de VoyPati: simulación multi-entidad del ecosistema (mercado, proveedores, express, core, accounting) con liquidación entre entidades.",
+  "type": "module",
+  "main": "src/main.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/main.js",
+    "day": "node src/simulate.js",
+    "visual": "start public/demo.html",
+    "extract": "node scripts/extract-core-real.js",
+    "github": "node scripts/github-org-snapshot.js"
+  },
+  "keywords": ["voypati", "contabilidad", "multi-entidad", "mercado", "proveedores", "express"],
+  "license": "MIT"
+}

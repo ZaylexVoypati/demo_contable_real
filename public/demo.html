@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VoyPati — Panel de Operaciones · Demo Contable Real</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary-50:#fff9ec; --primary-100:#fff2d3; --primary-200:#ffe1a5; --primary-400:#ffa932;
+    --primary-500:#ff8e0a; --primary-600:#ff7500; --primary-700:#cc5502; --primary-800:#a1410b;
+    --gray-50:#F7FAFC; --gray-100:#EDF2F7; --gray-200:#E2E8F0; --gray-400:#A0AEC0; --gray-500:#718096; --gray-600:#4A5568; --gray-700:#2D3748;
+    --green:#48BB78; --red:#E53E3E; --amber:#D69E2E; --blue:#63B3ED; --purple:#9F7AEA; --cyan:#4FD1C5; --pink:#F45774;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; background: var(--gray-50); color: var(--gray-600); font-size: 13px; }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ——— SIDEBAR ——— */
+  .sidebar { width: 260px; flex: none; background: #fff; border-right: 1px solid var(--gray-100); height: 100vh; position: sticky; top: 0; overflow-y: auto; padding-bottom: 30px; }
+  .sidebar .logo { display: flex; align-items: center; gap: 8px; padding: 18px 18px 14px; }
+  .logo-mark { width: 34px; height: 34px; border-radius: 9px; background: var(--primary-600); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 17px; }
+  .logo-text { font-weight: 800; font-size: 20px; letter-spacing: .2px; }
+  .logo-text b { color: #FC6232; font-weight: 800; }
+  .logo-text i { color: #4D4D4D; font-style: normal; font-weight: 600; }
+  .menu-group { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); padding: 14px 20px 6px; }
+  .menu-item { display: flex; align-items: center; gap: 10px; padding: 8px 18px; margin: 1px 0; cursor: pointer; font-size: 13px; color: var(--gray-500); position: relative; transition: background .15s; border-left: 5px solid transparent; }
+  .menu-item:hover { background: var(--gray-100); color: var(--gray-600); }
+  .menu-item.active { background: var(--primary-50); color: var(--primary-600); font-weight: 600; border-left-color: var(--primary-600); }
+  .menu-item .mi { width: 20px; text-align: center; font-size: 16px; }
+  .menu-item .tag { margin-left: auto; font-size: 9px; background: var(--primary-100); color: var(--primary-700); padding: 1px 6px; border-radius: 999px; font-weight: 600; }
+
+  /* ——— MAIN ——— */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar { height: 58px; background: #fff; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; gap: 14px; padding: 0 26px; position: sticky; top: 0; z-index: 20; }
+  .topbar .t-title { font-size: 16px; font-weight: 700; color: var(--gray-700); }
+  .topbar .t-sub { font-size: 11px; color: var(--gray-400); }
+  .topbar .spacer { flex: 1; }
+  .content { padding: 18px 26px 60px; max-width: 1280px; width: 100%; }
+
+  /* ——— BOTONES ——— */
+  .btn { font-family: inherit; font-size: 12.5px; font-weight: 600; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; transition: transform .15s, box-shadow .15s, background .15s; background: var(--gray-100); color: var(--gray-600); white-space: nowrap; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+  .btn.primary { background: var(--primary-600); color: #fff; }
+  .btn.primary:hover { background: var(--primary-700); }
+  .btn.success { background: var(--green); color: #fff; }
+  .btn.danger { background: var(--red); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--primary-600); box-shadow: inset 0 0 0 1px var(--primary-200); }
+  .btn.sm { padding: 4px 10px; font-size: 11px; border-radius: 6px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; }
+
+  /* ——— CARDS ——— */
+  .card { background: #fff; border: 1px solid var(--gray-100); border-radius: 4px; padding: 14px 16px; margin-bottom: 14px; }
+  .card h3 { font-size: 15px; color: var(--gray-700); margin-bottom: 2px; }
+  .card .sub { font-size: 10px; color: var(--gray-500); margin-bottom: 12px; font-weight: 400; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: #fff; border: 1px solid var(--gray-100); border-radius: 4px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
+  .kpi .l { font-size: 11.5px; color: var(--gray-500); }
+  .kpi .v { font-size: 22px; font-weight: 700; color: var(--gray-600); }
+  .kpi .i { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; color: #fff; font-size: 16px; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+
+  /* ——— TABLAS ——— */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--gray-400); padding: 8px 10px; border-bottom: 1px solid var(--gray-100); font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+  tr:hover td { background: var(--gray-50); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .right { text-align: right; }
+
+  .badge { display: inline-block; border-radius: 999px; padding: 2px 12px; line-height: 20px; font-size: 10.5px; font-weight: 600; }
+  .badge.green { background: #C6F6D5; color: #276749; }
+  .badge.red { background: #FED7D7; color: #9B2C2C; }
+  .badge.amber { background: #FEEBC8; color: #975A16; }
+  .badge.blue { background: #BEE3F8; color: #2C5282; }
+  .badge.purple { background: #E9D8FD; color: #553C9A; }
+  .badge.gray { background: var(--gray-200); color: var(--gray-600); }
+  .badge.orange { background: var(--primary-100); color: var(--primary-800); }
+  .badge.pink { background: #FED7E2; color: #97266D; }
+
+  .ok { color: var(--green); font-weight: 700; }
+  .ko { color: var(--red); font-weight: 700; }
+
+  /* ——— BARRAS ——— */
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11.5px; }
+  .bar-row .n { width: 180px; color: var(--gray-500); }
+  .bar-row .t { flex: 1; background: var(--gray-50); border-radius: 6px; height: 14px; overflow: hidden; }
+  .bar-row .f { height: 100%; border-radius: 6px; transition: width .6s ease; }
+  .bar-row .a { width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .log { background: var(--gray-50); border: 1px solid var(--gray-100); border-radius: 4px; padding: 10px 12px; max-height: 300px; overflow: auto; font-size: 11.5px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  .log div { padding: 2px 0; border-bottom: 1px dashed var(--gray-100); }
+  .log .in { color: var(--green); } .log .out { color: var(--red); } .log .info { color: var(--gray-500); }
+
+  .steps { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .step-pill { font-size: 10.5px; padding: 4px 10px; border-radius: 999px; background: var(--gray-100); color: var(--gray-400); font-weight: 600; }
+  .step-pill.done { background: #C6F6D5; color: #276749; }
+  .step-pill.active { background: var(--primary-500); color: #fff; }
+
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-track { background: #fdfdfd; }
+  ::-webkit-scrollbar-thumb { background: #ebc088; border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #ff8e0a; }
+
+  .flash { animation: flash 1s ease; }
+  @keyframes flash { 0% { background: var(--primary-100); } 100% { background: #fff; } }
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--gray-700); color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 12.5px; box-shadow: 0 6px 20px rgba(0,0,0,.2); z-index: 99; opacity: 0; transform: translateY(10px); transition: all .3s; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-mark">V</div>
+      <div class="logo-text"><b>Voy</b><i>Pati</i></div>
+    </div>
+    <div class="menu-group">Operaciones</div>
+    <div class="menu-item" data-view="dashboard"><span class="mi">🏠</span> Dashboard</div>
+    <div class="menu-item" data-view="ordenes"><span class="mi">🛒</span> Órdenes</div>
+    <div class="menu-item" data-view="caja"><span class="mi">🪙</span> Caja del Mercado</div>
+
+    <div class="menu-group">Finanzas</div>
+    <div class="menu-item" data-view="ingresos"><span class="mi">📥</span> Ingresos</div>
+    <div class="menu-item" data-view="gastos"><span class="mi">📤</span> Gastos</div>
+    <div class="menu-item" data-view="billetera"><span class="mi">🏦</span> Billetera VoyPati</div>
+    <div class="menu-item" data-view="facturas"><span class="mi">🧾</span> Facturas</div>
+    <div class="menu-item" data-view="consolidado"><span class="mi">📊</span> Consolidado</div>
+
+    <div class="menu-group">Entidades</div>
+    <div class="menu-item" data-view="negocios"><span class="mi">🏪</span> Negocios</div>
+    <div class="menu-item" data-view="conductores"><span class="mi">🏍️</span> Conductores</div>
+
+    <div class="menu-group">Cierre</div>
+    <div class="menu-item" data-view="conciliacion"><span class="mi">⚖️</span> Conciliación</div>
+    <div class="menu-item" data-view="eventos"><span class="mi">📡</span> Eventos</div>
+    <div class="menu-item" data-view="resumen"><span class="mi">📈</span> Resumen final</div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="t-title" id="pageTitle">Dashboard</div>
+        <div class="t-sub" id="pageSub">Panel de Operaciones · Demo Contable Real</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="steps" id="stepsBar"></div>
+      <div class="spacer"></div>
+      <button class="btn primary" id="btnStart" onclick="startDay()">▶ Iniciar día</button>
+      <button class="btn" id="btnNext" onclick="nextOrder()" disabled>Procesar 1 orden</button>
+      <button class="btn" id="btnAll" onclick="processAll()" disabled>Procesar todas</button>
+      <button class="btn" id="btnOps" onclick="runOperations()" disabled>Registrar gastos</button>
+      <button class="btn" id="btnInvoices" onclick="runInvoices()" disabled>Facturas</button>
+      <button class="btn" id="btnWithdraw" onclick="runWithdrawals()" disabled>Retiros</button>
+      <button class="btn danger sm" onclick="location.reload()">Reiniciar</button>
+    </div>
+
+    <div class="content" id="content"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   MOTOR MULTI-ENTIDAD (puerto del demo_contable_real a navegador)
+   ══════════════════════════════════════════════════════════════ */
+const ACCOUNT_META = {
+  voypati: { "1001":["Caja VoyPati (CUP)","asset"], "1002":["Caja VoyPati (USD)","asset"], "1200":["Comisiones por Cobrar","asset"], "2001":["Impuestos por Pagar","liability"], "3001":["Capital VoyPati","equity"], "4003":["Ingresos por Comisiones","revenue"], "4004":["Otros Ingresos","revenue"], "5003":["Gasto Marketing (Cupones)","expense"], "5004":["Comisiones de Promotores","expense"], "5005":["Gastos de Nómina","expense"], "5006":["Gastos Operativos","expense"], "5007":["Gastos por Impuestos","expense"], "5008":["Otros Gastos","expense"] },
+  business: { "1001":["Caja del Negocio","asset"], "1100":["Cuentas por Cobrar","asset"], "1300":["Inventario","asset"], "3001":["Capital del Negocio","equity"], "4001":["Ingresos por Ventas","revenue"], "5001":["Costo de Mercancía (COGS)","expense"], "5008":["Otros Gastos","expense"] },
+  driver: { "1001":["Billetera del Conductor","asset"], "4004":["Ingresos por Entregas","revenue"], "5008":["Gastos","expense"] },
+  caja: { "1001":["Caja / Almacén","asset"], "4001":["Ingresos de Caja","revenue"], "5008":["Egresos de Caja","expense"] },
+};
+const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+let seq = 1;
+const id = () => "id" + seq++;
+const nowISO = () => new Date().toISOString();
+
+const world = { ledgers: {}, events: [], orderSeq: 0 };
+function ledger(id) { if (!world.ledgers[id]) world.ledgers[id] = { type: id.split(":")[0], entries: [], accounts: {} }; return world.ledgers[id]; }
+function post(entity, { date, ref, description, lines }) {
+  const l = ledger(entity);
+  const clean = lines.filter(x => (x.debit ?? 0) !== 0 || (x.credit ?? 0) !== 0).map(x => ({ account: x.account, debit: r2(x.debit ?? 0), credit: r2(x.credit ?? 0) }));
+  const td = r2(clean.reduce((a, x) => a + x.debit, 0)), tc = r2(clean.reduce((a, x) => a + x.credit, 0));
+  if (Math.abs(td - tc) > 0.001) throw new Error("Asiento desbalanceado: " + description);
+  const e = { id: id(), date, ref, description, total: td, lines: clean };
+  l.entries.push(e);
+  clean.forEach(x => { const a = l.accounts[x.account] || (l.accounts[x.account] = { debit: 0, credit: 0, count: 0 }); a.debit = r2(a.debit + x.debit); a.credit = r2(a.credit + x.credit); a.count++; });
+  return e;
+}
+function emit(type, entity, payload) { world.events.push({ id: id(), type, entity, payload, ts: nowISO() }); }
+function balances(entity) {
+  const l = ledger(entity); const meta = ACCOUNT_META[l.type]; const out = {};
+  Object.entries(l.accounts).forEach(([code, a]) => {
+    const m = meta[code] || [code, "asset"];
+    const nat = m[1] === "asset" || m[1] === "expense" ? "debit" : "credit";
+    out[code] = { code, name: m[0], type: m[1], debit: r2(a.debit), credit: r2(a.credit), natural_balance: r2(nat === "debit" ? a.debit - a.credit : a.credit - a.debit), count: a.count };
+  });
+  return out;
+}
+function trial(entity) { const b = balances(entity); const td = r2(Object.values(b).reduce((a, x) => a + x.debit, 0)), tc = r2(Object.values(b).reduce((a, x) => a + x.credit, 0)); return { balances: b, totalDebit: td, totalCredit: tc, balanced: Math.abs(td - tc) < 0.01, entries: ledger(entity).entries.length }; }
+function pl(entity) { const b = balances(entity); const rev = Object.values(b).filter(x => x.type === "revenue"), exp = Object.values(b).filter(x => x.type === "expense"); const revenue = r2(rev.reduce((a, x) => a + x.natural_balance, 0)), expenses = r2(exp.reduce((a, x) => a + x.natural_balance, 0)); return { revenue, expenses, net_income: r2(revenue - expenses), rev, exp }; }
+function cashFlow(entity) { const cup = [], usd = []; ledger(entity).entries.forEach(e => e.lines.forEach(l => { const arr = l.account === "1002" ? usd : (l.account === "1001" ? cup : null); if (arr) arr.push({ date: e.date, ref: e.ref, description: e.description, kind: l.debit > 0 ? "in" : "out", amount: l.debit > 0 ? l.debit : l.credit, currency: l.account === "1002" ? "USD" : "CUP" }); })); return { cup, usd }; }
+
+/* ─── SERVICIOS ─── */
+const PAYMENTS = ["payment_on_delivery", "wallet", "troypay", "qvapay"];
+const BIZ = ["business:HUE1", "business:LMN", "business:CRN"];
+const BIZ_NAME = { "business:HUE1": "Tienda Central", "business:LMN": "Minimercado La Esquina", "business:CRN": "Carnicería El Bodegón" };
+const DRV = ["driver:D1", "driver:D2", "driver:D3"];
+const PRODUCTS = [["Arroz 5kg",220,155],["Aceite 1L",90,64],["Detergente",65,46],["Café 250g",120,85],["Azúcar 1kg",55,38],["Leche en polvo",180,128]];
+
+function createOrder(o) {
+  const subtotal = r2(o.items.reduce((a, it) => a + it.price * it.quantity, 0));
+  const discount = o.coupon ? r2(subtotal * o.coupon.discount_percentage / 100) : 0;
+  const total_price = r2(subtotal - discount + o.fare);
+  const investment = r2(o.items.reduce((a, it) => a + (it.cost ?? 0) * it.quantity, 0));
+  const products_total = r2(subtotal - discount);
+  return { id: id(), number: o.number, business: o.business, driver: o.driver, items: o.items, fare: r2(o.fare), subtotal, discount, total_price, products_total, investment, coupon: o.coupon, referral_code: o.referral_code, payment_method: o.payment_method, client_commission: r2(products_total * 0.1), messenger_profit: r2(o.fare * 0.9), status: "pending", is_paid: false, events: [{ status: "pending", note: "Creada" }] };
+}
+function payAtCashRegister(order, date) { post("caja:M1", { date, ref: "CASH-IN:" + order.number, description: "Pago de cliente " + order.number + " (" + order.payment_method + ")", lines: [{ account: "1001", debit: order.total_price }, { account: "4001", credit: order.total_price }] }); }
+function deliverShipment(order, date) {
+  const dp = r2(order.fare * 0.9), vc = r2(order.fare * 0.1);
+  post(order.driver, { date, ref: "DRIVER:" + order.number, description: "Entrega " + order.number + " — profit conductor 90%", lines: [{ account: "1001", debit: dp }, { account: "4004", credit: dp }] });
+  post("voypati", { date, ref: "COMM-EXP:" + order.number, description: "Comisión express 10% tarifa " + order.number, lines: [{ account: "1001", debit: vc }, { account: "4003", credit: vc }] });
+  post("caja:M1", { date, ref: "PAY-DRV:" + order.number, description: "Pago a " + order.driver, lines: [{ account: "5008", debit: dp }, { account: "1001", credit: dp }] });
+  post("caja:M1", { date, ref: "PAY-VPT:" + order.number, description: "Comisión express a VoyPati", lines: [{ account: "5008", debit: vc }, { account: "1001", credit: vc }] });
+  emit("express.shipment.delivered", order.driver, { order: order.number, fare: order.fare, driverProfit: dp, voypatiCommission: vc });
+}
+function bookBusinessSale(order, date) {
+  const net = r2(order.products_total - order.client_commission);
+  post(order.business, { date, ref: "SALE:" + order.number, description: "Liquidación venta (neto " + net + ")", lines: [{ account: "1001", debit: net }, { account: "4001", credit: net }] });
+  post(order.business, { date, ref: "COGS:" + order.number, description: "Costo de mercancía", lines: [{ account: "5001", debit: order.investment }, { account: "1300", credit: order.investment }] });
+}
+function runOrderJourney(order, date) {
+  payAtCashRegister(order, date);
+  deliverShipment(order, date);
+  bookBusinessSale(order, date);
+  post("voypati", { date, ref: "COMM-BIZ:" + order.number, description: "Comisión de negocio 10% " + order.number, lines: [{ account: "1001", debit: order.client_commission }, { account: "4003", credit: order.client_commission }] });
+  const net = r2(order.products_total - order.client_commission);
+  post("caja:M1", { date, ref: "PAY-BIZ:" + order.number, description: "Liquidación neta a " + order.business, lines: [{ account: "5008", debit: net }, { account: "1001", credit: net }] });
+  post("caja:M1", { date, ref: "PAY-VPT-BIZ:" + order.number, description: "Comisión negocio a VoyPati", lines: [{ account: "5008", debit: order.client_commission }, { account: "1001", credit: order.client_commission }] });
+  emit("orders.order.completed", "mercado", { order: order.number, total: order.total_price, referral: order.referral_code });
+  if (order.referral_code) {
+    const amount = r2(order.client_commission * 0.05);
+    post("voypati", { date, ref: "PROMO:" + order.referral_code, description: "Comisión promotor (referido " + order.referral_code + ")", lines: [{ account: "5004", debit: amount }, { account: "1001", credit: amount }] });
+    emit("core.referral.claimed", "core", { code: order.referral_code, amount });
+  }
+  order.status = "completed"; order.is_paid = true;
+  order.events.push({ status: "completed", note: "Liquidada" });
+}
+
+/* ─── ESTADO DE LA DEMO ─── */
+const state = { started: false, orders: [], phase: 0, opsDone: false, invoicesDone: false, withdrawDone: false };
+const PHASES = ["Apertura", "Órdenes", "Gastos", "Facturas", "Retiros", "Cierre"];
+
+function buildScenario() {
+  const list = [];
+  for (let i = 1; i <= 20; i++) {
+    const p = PRODUCTS[(i * 7) % PRODUCTS.length];
+    const qty = 1 + ((i * 3) % 3);
+    const fare = 25 + ((i * 5) % 5) * 5;
+    list.push(createOrder({
+      number: "ORD-" + String(i).padStart(4, "0"),
+      business: BIZ[i % 3],
+      driver: DRV[(i + 1) % 3],
+      items: [{ name: p[0], price: p[1], cost: p[2], quantity: qty }],
+      fare,
+      payment_method: PAYMENTS[i % 4],
+      coupon: i % 6 === 0 ? { code: "VOY10", discount_percentage: 10 } : null,
+      referral_code: i % 4 === 0 ? (i % 8 === 0 ? "REF-MARIA" : "REF-ALEX") : null,
+    }));
+  }
+  return list;
+}
+
+/* ─── ACCIONES (botones) ─── */
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
+function startDay() {
+  if (state.started) return;
+  state.started = true;
+  post("voypati", { date: "2026-09-04T08:00", ref: "CAPITAL", description: "Capital de VoyPati", lines: [{ account: "1001", debit: 12000 }, { account: "3001", credit: 12000 }] });
+  post("voypati", { date: "2026-09-04T08:00", ref: "CAPITAL-USD", description: "Capital VoyPati (USD)", lines: [{ account: "1002", debit: 500 }, { account: "3001", credit: 500 }] });
+  BIZ.forEach(b => { post(b, { date: "2026-09-04T08:00", ref: "CAPITAL", description: "Capital de " + BIZ_NAME[b], lines: [{ account: "1001", debit: 5000 }, { account: "3001", credit: 5000 }] }); post(b, { date: "2026-09-04T08:10", ref: "INV-SEED", description: "Inventario inicial", lines: [{ account: "1300", debit: 3000 }, { account: "1001", credit: 3000 }] }); });
+  state.orders = buildScenario();
+  state.phase = 1;
+  updateButtons(); render();
+  setSteps();
+  toast("Día iniciado · " + state.orders.length + " órdenes pendientes");
+}
+function nextOrder() {
+  const pend = state.orders.filter(o => o.status === "pending");
+  if (!pend.length) { toast("No quedan órdenes pendientes"); return; }
+  const order = pend[0];
+  runOrderJourney(order, "2026-09-04T" + String(9 + order.number.slice(-2) % 12).padStart(2, "0") + ":00");
+  updateButtons(); render();
+  toast("✓ " + order.number + " liquidada (" + BIZ_NAME[order.business] + " → " + order.driver + ")");
+}
+function processAll() { const pend = state.orders.filter(o => o.status === "pending"); pend.forEach((o, i) => runOrderJourney(o, "2026-09-04T" + String(9 + (i % 12)).padStart(2, "0") + ":00")); updateButtons(); render(); toast("✓ " + pend.length + " órdenes procesadas"); }
+function runOperations() {
+  if (state.opsDone) return; state.opsDone = true; state.phase = 2;
+  const d = "2026-09-04T10:00";
+  post("caja:M1", { date: d, ref: "EXP", description: "Gasto — Alquiler de local (250)", lines: [{ account: "5008", debit: 250 }, { account: "1001", credit: 250 }] });
+  post("caja:M1", { date: d, ref: "EXP", description: "Gasto — Servicios (120)", lines: [{ account: "5008", debit: 120 }, { account: "1001", credit: 120 }] });
+  post("caja:M1", { date: d, ref: "EXP", description: "Gasto — Materiales de empaque (60)", lines: [{ account: "5008", debit: 60 }, { account: "1001", credit: 60 }] });
+  post("caja:M1", { date: "2026-09-04T18:00", ref: "PAYROLL", description: "Nómina mensajeros (830)", lines: [{ account: "5008", debit: 830 }, { account: "1001", credit: 830 }] });
+  const couponTotal = r2(state.orders.filter(o => o.is_paid && o.discount > 0).reduce((a, o) => a + o.discount, 0));
+  if (couponTotal > 0) post("voypati", { date: "2026-09-04T14:00", ref: "COUPONS", description: "Subsidio de cupones (" + couponTotal + ")", lines: [{ account: "5003", debit: couponTotal }, { account: "1001", credit: couponTotal }] });
+  post("voypati", { date: "2026-09-04T09:00", ref: "OPEX", description: "Gastos operativos VoyPati (120)", lines: [{ account: "5006", debit: 120 }, { account: "1001", credit: 120 }] });
+  post("voypati", { date: "2026-09-04T16:00", ref: "TAX", description: "Devengo de impuesto (60)", lines: [{ account: "5007", debit: 60 }, { account: "2001", credit: 60 }] });
+  post("voypati", { date: "2026-09-04T16:30", ref: "TAX-PAY", description: "Pago parcial impuesto (30)", lines: [{ account: "2001", debit: 30 }, { account: "1001", credit: 30 }] });
+  updateButtons(); render(); toast("Gastos registrados");
+}
+function runInvoices() {
+  if (state.invoicesDone) return; state.invoicesDone = true; state.phase = 3;
+  const byBiz = {};
+  state.orders.filter(o => o.is_paid).forEach(o => { byBiz[o.business] = (byBiz[o.business] || 0) + o.client_commission; });
+  Object.entries(byBiz).forEach(([b, sub], idx) => {
+    sub = r2(sub); const tax = r2(sub * 0.05);
+    const number = "FAC-2026-0000" + (idx + 1);
+    world.events.push({ id: id(), type: "finance.invoice.issued", entity: "voypati", payload: { number, business: b, commission_subtotal: sub, tax_amount: tax }, ts: nowISO() });
+    state.invoices.push({ number, business: BIZ_NAME[b], businessId: b, subtotal: sub, tax_percentage: 5, tax_amount: tax, total: r2(sub + tax), status: "issued" });
+  });
+  updateButtons(); render(); toast("Facturas emitidas");
+}
+function runWithdrawals() {
+  if (state.withdrawDone) return; state.withdrawDone = true; state.phase = 4;
+  const w1 = { business: "business:HUE1", amount: 800, date: "2026-09-04T19:00" }, w2 = { business: "business:LMN", amount: 500, date: "2026-09-04T19:05" };
+  [w1, w2].forEach(w => { post(w.business, { date: w.date, ref: "WITHDRAW:" + w.amount, description: "Retiro del negocio " + w.amount, lines: [{ account: "3001", debit: w.amount }, { account: "1001", credit: w.amount }] }); state.withdrawals.push({ business: BIZ_NAME[w.business], amount: w.amount, status: "completed" }); });
+  updateButtons(); render(); toast("Retiros de negocios realizados");
+}
+state.invoices = []; state.withdrawals = [];
+
+function updateButtons() {
+  const s = document.getElementById("btnStart"), n = document.getElementById("btnNext"), a = document.getElementById("btnAll"), o = document.getElementById("btnOps"), i = document.getElementById("btnInvoices"), w = document.getElementById("btnWithdraw");
+  s.disabled = state.started;
+  n.disabled = !state.started || !state.orders.some(x => x.status === "pending");
+  a.disabled = !state.started || !state.orders.some(x => x.status === "pending");
+  o.disabled = !state.started || state.opsDone || !state.orders.some(x => x.is_paid);
+  i.disabled = !state.started || state.invoicesDone || !state.orders.some(x => x.is_paid);
+  w.disabled = !state.started || state.withdrawDone || !state.invoicesDone;
+}
+function setSteps() {
+  const st = document.getElementById("stepsBar");
+  st.innerHTML = PHASES.map((p, idx) => `<span class="step-pill ${idx < state.phase ? "done" : idx === state.phase ? "active" : ""}">${p}</span>`).join("");
+}
+
+/* ─── FORMATO ─── */
+const fmt = n => (Math.round(n * 100) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtI = n => (Math.round(n * 100) / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+/* ─── RENDER POR VISTA ─── */
+const VIEWS = { dashboard: "Dashboard", ordenes: "Órdenes", caja: "Caja del Mercado", ingresos: "Ingresos", gastos: "Gastos", billetera: "Billetera VoyPati", facturas: "Facturas", consolidado: "Consolidado", negocios: "Negocios", conductores: "Conductores", conciliacion: "Conciliación", eventos: "Eventos", resumen: "Resumen final" };
+
+function kpi(label, value, icon, color) {
+  return `<div class="kpi"><div><div class="l">${label}</div><div class="v">${value}</div></div><div class="i" style="background:${color}">${icon}</div></div>`;
+}
+function consolidado() {
+  const paid = state.orders.filter(o => o.is_paid);
+  const sum = f => r2(paid.reduce((a, o) => a + f(o), 0));
+  return { income_executed: sum(o => o.total_price), investment: sum(o => o.investment), shipping: sum(o => o.fare), messenger: sum(o => o.messenger_profit), commission: sum(o => o.client_commission), win: r2(sum(o => o.total_price) - sum(o => o.investment) + sum(o => o.fare) - sum(o => o.messenger_profit) - sum(o => o.client_commission)) };
+}
+function recalc() {
+  const con = consolidado();
+  const vp = pl("voypati"); const vCash = cashFlow("voypati");
+  const vCup = vCash.cup.reduce((a, m) => a + (m.kind === "in" ? m.amount : -m.amount), 0);
+  const bizNet = BIZ.reduce((a, b) => a + pl(b).net_income, 0);
+  const drvWallet = DRV.reduce((a, d) => a + (balances(d)["1001"]?.natural_balance ?? 0), 0);
+  const productsTotal = r2(state.orders.filter(o => o.is_paid).reduce((a, o) => a + o.products_total, 0));
+  const fares90 = r2(state.orders.filter(o => o.is_paid).reduce((a, o) => a + r2(o.fare * 0.9), 0));
+  const fares10 = r2(state.orders.filter(o => o.is_paid).reduce((a, o) => a + r2(o.fare * 0.1), 0));
+  const bizSales = BIZ.reduce((a, b) => a + (balances(b)["4001"]?.natural_balance ?? 0), 0);
+  const vpComm = balances("voypati")["4003"]?.natural_balance ?? 0;
+  const cajaBal = balances("caja:M1")["1001"]?.natural_balance ?? 0;
+  const opOut = state.opsDone ? 1260 : 0;
+  const checks = [
+    ["Negocios reciben el 90% de sus productos", r2(productsTotal * 0.9), bizSales],
+    ["Conductores reciben el 90% de las tarifas", fares90, drvWallet],
+    ["VoyPati cobra 10% productos + 10% tarifas", r2((state.orders.filter(o => o.is_paid).reduce((a, o) => a + o.client_commission, 0)) + fares10), vpComm],
+    ["Caja del mercado cuadra (liquidación ± gastos)", r2(-opOut), cajaBal],
+  ].map(c => ({ name: c[0], expected: c[1], actual: c[2], ok: Math.abs(c[1] - c[2]) < 0.5 }));
+  return { con, vp, vCup, bizNet, drvWallet, checks, allOk: checks.every(c => c.ok), vpBal: balances("voypati"), bizSales, productsTotal, vpComm };
+}
+
+function renderDashboard(r) {
+  const pend = state.orders.filter(o => o.status === "pending").length;
+  const done = state.orders.length - pend;
+  const html = `
+  <div class="kpi-grid">
+    ${kpi("Órdenes procesadas", done + " / " + state.orders.length, "🛒", "#F59E0B")}
+    ${kpi("Volumen vendido (GMV)", fmtI(r.con.income_executed) + " CUP", "💵", "#EF4444")}
+    ${kpi("Comisiones VoyPati", fmtI(r.vp.revenue) + " CUP", "💰", "#3B82F6")}
+    ${kpi("Ganancia del mercado (win)", fmtI(r.con.win) + " CUP", "📈", "#10B981")}
+    ${kpi("Resultado neto VoyPati", fmtI(r.vp.net_income) + " CUP", "🏦", "#8B5CF6")}
+    ${kpi("Billeteras conductores", fmtI(r.drvWallet) + " CUP", "🏍️", "#06B6D4")}
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Simulador del flujo</h3><div class="sub">Recorre el día como en producción: mercado → proveedores → express → core</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" onclick="startDay()">▶ Iniciar día</button>
+        <button class="btn" onclick="nextOrder()" ${!state.started ? "disabled" : ""}>Procesar 1 orden</button>
+        <button class="btn" onclick="processAll()" ${!state.started ? "disabled" : ""}>Procesar todas</button>
+        <button class="btn" onclick="runOperations()" ${!state.started || state.opsDone ? "disabled" : ""}>Registrar gastos</button>
+        <button class="btn" onclick="runInvoices()" ${!state.started || state.invoicesDone ? "disabled" : ""}>Emitir facturas</button>
+        <button class="btn" onclick="runWithdrawals()" ${!state.started || state.withdrawDone ? "disabled" : ""}>Retiros</button>
+      </div>
+      <div style="margin-top:12px;font-size:11.5px;color:#718096">
+        <div>• Cada orden genera <b>5 asientos</b> en su recorrido por el ecosistema.</div>
+        <div>• Las comisiones se liquidan en la caja del mercado a cada entidad.</div>
+        <div>• Al final, la <b>conciliación cruzada</b> verifica que todo cuadre.</div>
+      </div>
+    </div>
+    <div class="card"><h3>Estado del día</h3><div class="sub">Progreso de la simulación</div>
+      <div class="log" id="dashboardLog" style="max-height:180px"></div>
+    </div>
+  </div>
+  <div class="card"><h3>Últimas órdenes</h3><div class="sub">Clic en “Liquidar” para procesar una orden puntual</div>
+    <table><thead><tr><th>Orden</th><th>Negocio</th><th>Conductor</th><th class="num">Total</th><th class="num">Comisión</th><th>Pago</th><th>Estado</th><th class="right">Acción</th></tr></thead><tbody>
+    ${state.orders.slice(-6).map(o => `<tr>
+      <td><b>${o.number}</b></td><td>${BIZ_NAME[o.business]}</td><td>${o.driver}</td>
+      <td class="num">${fmt(o.total_price)}</td><td class="num">${fmt(o.client_commission)}</td>
+      <td>${badgePay(o.payment_method)}</td><td>${badgeOrder(o)}</td>
+      <td class="right">${o.status === "pending" ? `<button class="btn sm primary" onclick="liquidar('${o.number}')">Liquidar</button>` : "—"}</td>
+    </tr>`).join("")}
+    </tbody></table>
+  </div>`;
+  document.getElementById("content").innerHTML = html;
+  renderLog("dashboardLog");
+}
+function liquidar(num) {
+  const o = state.orders.find(x => x.number === num);
+  if (!o || o.status !== "pending") return;
+  runOrderJourney(o, "2026-09-04T10:00");
+  updateButtons(); render(); toast("✓ " + o.number + " liquidada");
+}
+function badgePay(p) { const m = { payment_on_delivery: "Pago contra entrega", wallet: "Monedero", troypay: "Troypay", qvapay: "Qvapay" }; return `<span class="badge gray">${m[p] || p}</span>`; }
+function badgeOrder(o) { return o.status === "completed" ? `<span class="badge green">✓ Entregada</span>` : `<span class="badge amber">⏳ Pendiente</span>`; }
+
+function renderLog(target) {
+  const logEl = document.getElementById(target); if (!logEl) return;
+  logEl.innerHTML = [...state.orders].reverse().map(o => {
+    const icon = o.status === "completed" ? "✓" : "○";
+    return `<div>${icon} <b>${o.number}</b> ${BIZ_NAME[o.business]} → ${o.driver} · ${fmt(o.total_price)} CUP · comisión ${fmt(o.client_commission)}</div>`;
+  }).join("") || "<div class='info'>Inicia el día para ver el flujo</div>";
+}
+
+function renderOrdenes(r) {
+  document.getElementById("content").innerHTML = `
+  <div class="card"><h3>Órdenes del día</h3><div class="sub">${state.orders.length} órdenes · cada una recorre mercado → proveedores → express → core</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn primary" onclick="nextOrder()">Procesar 1 orden</button><button class="btn" onclick="processAll()">Procesar todas</button></div>
+    <table><thead><tr><th>Orden</th><th>Negocio</th><th>Conductor</th><th class="num">Productos</th><th class="num">Tarifa</th><th class="num">Total</th><th class="num">Comisión 10%</th><th>Cupón</th><th>Referido</th><th>Estado</th><th class="right">Acción</th></tr></thead><tbody>
+    ${state.orders.map(o => `<tr>
+      <td><b>${o.number}</b></td><td>${BIZ_NAME[o.business]}</td><td>${o.driver}</td>
+      <td class="num">${fmt(o.products_total)}</td><td class="num">${fmt(o.fare)}</td><td class="num">${fmt(o.total_price)}</td>
+      <td class="num">${fmt(o.client_commission)}</td>
+      <td>${o.coupon ? `<span class="badge orange">${o.coupon.code} ${o.coupon.discount_percentage}%</span>` : "—"}</td>
+      <td>${o.referral_code ? `<span class="badge purple">${o.referral_code}</span>` : "—"}</td>
+      <td>${badgeOrder(o)}</td>
+      <td class="right">${o.status === "pending" ? `<button class="btn sm primary" onclick="liquidar('${o.number}')">Liquidar</button>` : "—"}</td>
+    </tr>`).join("")}
+    </tbody></table>
+  </div>`;
+}
+
+function renderIngresos(r) {
+  const rows = ledger("voypati").entries.filter(e => e.lines.some(l => l.credit > 0 && ACCOUNT_META.voypati[l.account][1] === "revenue"));
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Ingresos por comisiones", fmtI(r.vp.revenue) + " CUP", "💰", "#3B82F6")}
+    ${kpi("De negocios (10%)", fmtI(r.con.commission) + " CUP", "🏪", "#F59E0B")}
+    ${kpi("De tarifas (10%)", fmtI(r2(state.orders.filter(o=>o.is_paid).reduce((a,o)=>a+r2(o.fare*0.1),0))) + " CUP", "🏍️", "#06B6D4")}
+    ${kpi("Saldo de caja VoyPati", fmtI(r.vCup) + " CUP", "🏦", "#10B981")}
+  </div>
+  <div class="card"><h3>Asientos de ingreso (CompanyWallet)</h3><div class="sub">Todas las comisiones que entran a la billetera corporativa de VoyPati</div>
+    <table><thead><tr><th>Ref</th><th>Descripción</th><th class="num">Monto</th><th>Cuenta</th></tr></thead><tbody>
+    ${rows.map(e => e.lines.filter(l => l.credit > 0).map(l => `<tr><td>${e.ref}</td><td>${e.description}</td><td class="num ok">+${fmt(l.credit)} CUP</td><td>${ACCOUNT_META.voypati[l.account][0]}</td></tr>`).join("")).join("") || "<tr><td colspan='4' class='info'>Sin ingresos aún</td></tr>"}
+    </tbody></table>
+  </div>`;
+}
+
+function renderGastos(r) {
+  const market = ledger("caja:M1").entries.filter(e => /EXP|PAYROLL/.test(e.ref));
+  const corp = ledger("voypati").entries.filter(e => /COUPONS|OPEX|TAX|PROMO/.test(e.ref));
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Gastos del mercado (caja)", fmtI(market.reduce((a,e)=>a+e.total,0)) + " CUP", "🪙", "#EF4444")}
+    ${kpi("Gastos corporativos VoyPati", fmtI(r.vp.expenses) + " CUP", "🏦", "#8B5CF6")}
+    ${kpi("Impuestos por pagar", fmtI((balances("voypati")["2001"]?.natural_balance ?? 0)) + " CUP", "🧾", "#F59E0B")}
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Gastos del mercado (ExpenseLegend)</h3><div class="sub">Registrados en la caja del almacén con leyenda real</div>
+      <table><thead><tr><th>Ref</th><th>Descripción</th><th class="num">Monto</th></tr></thead><tbody>
+      ${market.map(e => `<tr><td>${e.ref}</td><td>${e.description}</td><td class="num ko">−${fmt(e.total)} CUP</td></tr>`).join("") || "<tr><td colspan='3' class='info'>Sin gastos aún</td></tr>"}
+      </tbody></table>
+    </div>
+    <div class="card"><h3>Gastos corporativos (CompanyTransaction)</h3><div class="sub">Cupones, promotores, operativos e impuestos de VoyPati</div>
+      <table><thead><tr><th>Ref</th><th>Descripción</th><th class="num">Monto</th></tr></thead><tbody>
+      ${corp.map(e => `<tr><td>${e.ref}</td><td>${e.description}</td><td class="num ko">−${fmt(e.total)} CUP</td></tr>`).join("") || "<tr><td colspan='3' class='info'>Sin gastos aún</td></tr>"}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+function renderBilletera(r) {
+  const cf = cashFlow("voypati");
+  let run = 0; const rows = cf.cup.map(m => { run = r2(run + (m.kind === "in" ? m.amount : -m.amount)); return { ...m, after: run }; });
+  let runUsd = 0; const rowsUsd = cf.usd.map(m => { runUsd = r2(runUsd + (m.kind === "in" ? m.amount : -m.amount)); return { ...m, after: runUsd }; });
+  const tb = trial("voypati");
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Saldo CUP", fmtI(run) + " CUP", "💵", "#F59E0B")}
+    ${kpi("Saldo USD", fmtI(runUsd) + " USD", "💵", "#10B981")}
+    ${kpi("Ingresos por comisiones", fmtI(r.vp.revenue) + " CUP", "💰", "#3B82F6")}
+    ${kpi("Partida doble", tb.balanced ? "✔ Cuadra" : "✘ No", "⚖️", tb.balanced ? "#10B981" : "#EF4444")}
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Movimientos CUP · saldo corriente</h3><div class="sub">CompanyWallet balance_cup</div>
+      <table><thead><tr><th>Ref</th><th>Descripción</th><th>Tipo</th><th class="num">Monto</th><th class="num">Saldo después</th></tr></thead><tbody>
+      ${rows.map(m => `<tr><td>${m.ref}</td><td>${m.description}</td><td>${m.kind === "in" ? `<span class="badge green">Entrada</span>` : `<span class="badge red">Salida</span>`}</td><td class="num">${m.kind === "in" ? "+" : "−"}${fmt(m.amount)}</td><td class="num"><b>${fmt(m.after)}</b></td></tr>`).join("") || "<tr><td colspan='5' class='info'>Sin movimientos</td></tr>"}
+      </tbody></table>
+    </div>
+    <div class="card"><h3>Movimientos USD · saldo corriente</h3><div class="sub">CompanyWallet balance_usd</div>
+      <table><thead><tr><th>Ref</th><th>Descripción</th><th>Tipo</th><th class="num">Monto</th><th class="num">Saldo después</th></tr></thead><tbody>
+      ${rowsUsd.map(m => `<tr><td>${m.ref}</td><td>${m.description}</td><td>${m.kind === "in" ? `<span class="badge green">Entrada</span>` : `<span class="badge red">Salida</span>`}</td><td class="num">${m.kind === "in" ? "+" : "−"}${fmt(m.amount)}</td><td class="num"><b>${fmt(m.after)}</b></td></tr>`).join("") || "<tr><td colspan='5' class='info'>Sin movimientos USD</td></tr>"}
+      </tbody></table>
+    </div>
+  </div>
+  <div class="card"><h3>Libro diario de VoyPati</h3><div class="sub">Asientos de partida doble (Debe = Haber)</div>
+    <table><thead><tr><th>Ref</th><th>Descripción</th><th class="num">Debe</th><th class="num">Haber</th><th>Cuentas</th></tr></thead><tbody>
+    ${ledger("voypati").entries.slice().reverse().map(e => `<tr><td>${e.ref}</td><td>${e.description}</td><td class="num">${fmt(e.lines.filter(l=>l.debit>0).reduce((a,l)=>a+l.debit,0))}</td><td class="num">${fmt(e.lines.filter(l=>l.credit>0).reduce((a,l)=>a+l.credit,0))}</td><td>${e.lines.map(l => l.account).join(", ")}</td></tr>`).join("") || "<tr><td colspan='5' class='info'>Sin asientos</td></tr>"}
+      </tbody></table>
+  </div>`;
+}
+
+function renderCaja(r) {
+  const cf = cashFlow("caja:M1"); const bal = r2(cf.cup.reduce((a, m) => a + (m.kind === "in" ? m.amount : -m.amount), 0));
+  const inc = balances("caja:M1")["4001"]?.natural_balance ?? 0, eg = balances("caja:M1")["5008"]?.natural_balance ?? 0;
+  const maxW = Math.max(r.con.income_executed, r.con.investment, r.con.shipping, r.con.messenger, r.con.commission, 1);
+  const bar = (n, label, val, color) => `<div class="bar-row"><div class="n">${label}</div><div class="t"><div class="f" style="width:${(val / maxW) * 100}%;background:${color}"></div></div><div class="a">${fmtI(val)}</div></div>`;
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Saldo de caja", fmtI(bal) + " CUP", "🪙", bal < 0 ? "#EF4444" : "#10B981")}
+    ${kpi("Ingresos de caja", fmtI(inc) + " CUP", "📥", "#3B82F6")}
+    ${kpi("Egresos (liquidación)", fmtI(eg) + " CUP", "📤", "#EF4444")}
+    ${kpi("Ganancia del mercado (win)", fmtI(r.con.win) + " CUP", "📈", "#10B981")}
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Consolidado del mercado</h3><div class="sub">Fórmula real: ingreso − inversión + mensajería − profit mensajeros − comisión (getMetricsAll.ts:220)</div>
+      ${bar("Ingreso ejecutado", "Ingreso ejecutado", r.con.income_executed, "#3B82F6")}
+      ${bar("Inversión (costos)", "Inversión (costos)", r.con.investment, "#A0AEC0")}
+      ${bar("Cobro mensajería", "Cobro mensajería", r.con.shipping, "#06B6D4")}
+      ${bar("Profit mensajeros", "Profit mensajeros", r.con.messenger, "#F45774")}
+      ${bar("Comisión VoyPati", "Comisión VoyPati", r.con.commission, "#F59E0B")}
+      <div style="margin-top:10px;font-size:13px;font-weight:700;color:${r.con.win >= 0 ? "#276749" : "#9B2C2C"}">GANANCIA (win) = ${fmtI(r.con.win)} CUP</div>
+    </div>
+    <div class="card"><h3>Movimientos de la caja</h3><div class="sub">Hub de liquidación: cobra al cliente y liquida a negocio, conductor y VoyPati</div>
+      <table><thead><tr><th>Ref</th><th>Descripción</th><th>Tipo</th><th class="num">Monto</th></tr></thead><tbody>
+      ${cf.cup.map(m => `<tr><td>${m.ref}</td><td>${m.description}</td><td>${m.kind === "in" ? `<span class="badge green">Entrada</span>` : `<span class="badge red">Salida</span>`}</td><td class="num">${m.kind === "in" ? "+" : "−"}${fmt(m.amount)}</td></tr>`).join("") || "<tr><td colspan='4' class='info'>Sin movimientos</td></tr>"}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+function renderFacturas(r) {
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Facturas emitidas", state.invoices.length, "🧾", "#F59E0B")}
+    ${kpi("Total facturado", fmtI(state.invoices.reduce((a, i) => a + i.total, 0)) + " CUP", "💰", "#3B82F6")}
+    ${kpi("Comisiones por cobrar", fmtI((balances("voypati")["1200"]?.natural_balance ?? 0)) + " CUP", "🏪", "#8B5CF6")}
+  </div>
+  <div class="card"><h3>Facturas de comisión (Invoice FAC-2026-XXXXX)</h3><div class="sub">Emitidas a los negocios por la comisión del 10%</div>
+    <table><thead><tr><th>Número</th><th>Negocio</th><th class="num">Subtotal</th><th class="num">Impuesto 5%</th><th class="num">Total</th><th>Estado</th></tr></thead><tbody>
+    ${state.invoices.map(i => `<tr><td><b>${i.number}</b></td><td>${i.business}</td><td class="num">${fmt(i.subtotal)}</td><td class="num">${fmt(i.tax_amount)}</td><td class="num"><b>${fmt(i.total)}</b></td><td><span class="badge green">Emitida</span></td></tr>`).join("") || "<tr><td colspan='6' class='info'>Pulsa “Facturas” en la barra superior para emitirlas</td></tr>"}
+      </tbody></table>
+  </div>`;
+}
+
+function renderNegocios(r) {
+  const rows = BIZ.map(b => { const bb = balances(b); const tb = trial(b); return { id: b, name: BIZ_NAME[b], caja: bb["1001"]?.natural_balance ?? 0, ventas: bb["4001"]?.natural_balance ?? 0, cogs: bb["5001"]?.natural_balance ?? 0, inv: bb["1300"]?.natural_balance ?? 0, neto: pl(b).net_income, ok: tb.balanced }; });
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Resultado neto de negocios", fmtI(r.bizNet) + " CUP", "🏪", "#F59E0B")}
+    ${kpi("Retiros realizados", state.withdrawals.length + " (" + fmtI(state.withdrawals.reduce((a, w) => a + w.amount, 0)) + " CUP)", "💸", "#EF4444")}
+    ${kpi("Ventas netas (90%)", fmtI(r.bizSales) + " CUP", "📈", "#10B981")}
+  </div>
+  <div class="card"><h3>Cuentas financieras por negocio (Account)</h3><div class="sub">vpt_proveedores · reciben el 90% neto de sus productos</div>
+    <table><thead><tr><th>Negocio</th><th class="num">Caja</th><th class="num">Ventas (neto)</th><th class="num">COGS</th><th class="num">Inventario</th><th class="num">Resultado</th><th>Partida doble</th></tr></thead><tbody>
+    ${rows.map(x => `<tr><td><b>${x.name}</b></td><td class="num">${fmt(x.caja)}</td><td class="num">${fmt(x.ventas)}</td><td class="num">${fmt(x.cogs)}</td><td class="num">${fmt(x.inv)}</td><td class="num"><b>${fmt(x.neto)}</b></td><td>${x.ok ? `<span class="ok">✔</span>` : `<span class="ko">✘</span>`}</td></tr>`).join("")}
+      </tbody></table>
+  </div>
+  <div class="card"><h3>Retiros (Withdrawal)</h3><div class="sub">Salidas de capital de los negocios</div>
+    <table><thead><tr><th>Negocio</th><th class="num">Monto</th><th>Estado</th></tr></thead><tbody>
+    ${state.withdrawals.map(w => `<tr><td>${w.business}</td><td class="num">${fmt(w.amount)} CUP</td><td><span class="badge green">Completado</span></td></tr>`).join("") || "<tr><td colspan='3' class='info'>Pulsa “Retiros” para ejecutarlos</td></tr>"}
+      </tbody></table>
+  </div>`;
+}
+
+function renderConductores(r) {
+  const rows = DRV.map(d => { const bb = balances(d); return { id: d, wallet: bb["1001"]?.natural_balance ?? 0, earn: bb["4004"]?.natural_balance ?? 0 }; });
+  const total = rows.reduce((a, x) => a + x.wallet, 0);
+  const fares = r2(state.orders.filter(o => o.is_paid).reduce((a, o) => a + r2(o.fare * 0.9), 0));
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Billeteras de conductores", fmtI(total) + " CUP", "🏍️", "#06B6D4")}
+    ${kpi("Esperado (90% tarifas)", fmtI(fares) + " CUP", "🎯", "#F59E0B")}
+    ${kpi("Entregas liquidadas", state.orders.filter(o => o.is_paid).length, "📦", "#3B82F6")}
+  </div>
+  <div class="card"><h3>DriverWallet — 90% de las tarifas</h3><div class="sub">vpt_express · cada entrega abona el 90% de la tarifa a su billetera</div>
+    <table><thead><tr><th>Conductor</th><th class="num">Billetera</th><th class="num">Ingresos por entregas</th><th>Regla</th></tr></thead><tbody>
+    ${rows.map(x => `<tr><td><b>${x.id}</b></td><td class="num"><b>${fmt(x.wallet)} CUP</b></td><td class="num">${fmt(x.earn)} CUP</td><td><span class="badge orange">90%</span></td></tr>`).join("")}
+      </tbody></table>
+  </div>`;
+}
+
+function renderConciliacion(r) {
+  document.getElementById("content").innerHTML = `
+  <div class="card" style="border-color:${r.allOk ? "#48BB78" : "#E53E3E"}">
+    <h3 style="display:flex;justify-content:space-between;align-items:center">Conciliación cruzada entre servicios <span class="badge ${r.allOk ? "green" : "red"}">${r.allOk ? "✔ TODAS CUADRAN" : "✘ REVISAR"}</span></h3>
+    <div class="sub">Verifica que la realidad contable cuadre entre todas las entidades del ecosistema</div>
+    <table><thead><tr><th>Verificación</th><th class="num">Esperado</th><th class="num">Real</th><th>Resultado</th></tr></thead><tbody>
+    ${r.checks.map(c => `<tr><td>${c.name}</td><td class="num">${fmt(c.expected)}</td><td class="num">${fmt(c.actual)}</td><td>${c.ok ? `<span class="ok">✔ Cuadra</span>` : `<span class="ko">✘ Diferencia ${fmt(Math.abs(c.expected - c.actual))}</span>`}</td></tr>`).join("")}
+      </tbody></table>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Trial balance · VoyPati</h3><div class="sub">Debe = Haber por entidad</div>
+      <table><thead><tr><th>Cuenta</th><th class="num">Debe</th><th class="num">Haber</th><th class="num">Saldo</th></tr></thead><tbody>
+      ${Object.values(trial("voypati").balances).map(b => `<tr><td>${b.code} ${b.name}</td><td class="num">${fmt(b.debit)}</td><td class="num">${fmt(b.credit)}</td><td class="num">${fmt(b.natural_balance)}</td></tr>`).join("")}
+      </tbody></table>
+      <div style="margin-top:8px">Totales: ${fmt(trial("voypati").totalDebit)} Debe = ${fmt(trial("voypati").totalCredit)} Haber ${trial("voypati").balanced ? `<span class="ok">✔</span>` : `<span class="ko">✘</span>`}</div>
+    </div>
+    <div class="card"><h3>P&L VoyPati</h3><div class="sub">Estado de resultados corporativo</div>
+      <table><thead><tr><th>Concepto</th><th class="num">Monto</th></tr></thead><tbody>
+      ${pl("voypati").rev.map(x => `<tr><td>Ingreso — ${x.name}</td><td class="num ok">+${fmt(x.natural_balance)}</td></tr>`).join("")}
+      ${pl("voypati").exp.map(x => `<tr><td>Gasto — ${x.name}</td><td class="num ko">−${fmt(x.natural_balance)}</td></tr>`).join("")}
+      <tr style="font-weight:700"><td>Resultado neto</td><td class="num">${fmt(r.vp.net_income)} CUP</td></tr>
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+function renderEventos(r) {
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("Eventos de dominio", world.events.length, "📡", "#8B5CF6")}
+    ${kpi("Envíos entregados", world.events.filter(e => e.type === "express.shipment.delivered").length, "📦", "#3B82F6")}
+    ${kpi("Órdenes completadas", world.events.filter(e => e.type === "orders.order.completed").length, "🛒", "#10B981")}
+    ${kpi("Referidos reclamados", world.events.filter(e => e.type === "core.referral.claimed").length, "🎁", "#F59E0B")}
+  </div>
+  <div class="card"><h3>Outbox / Eventing (vpt-core)</h3><div class="sub">Eventos de dominio que los servicios consumen (patrón Outbox)</div>
+    <div class="log" style="max-height:420px">
+      ${world.events.map(e => `<div class="info"><b>${e.type}</b> · ${e.entity} · ${JSON.stringify(e.payload)}</div>`).join("") || "<div>Sin eventos aún</div>"}
+    </div>
+  </div>`;
+}
+
+function renderResumen(r) {
+  const invTotal = state.invoices.reduce((a, i) => a + i.total, 0);
+  const wdTotal = state.withdrawals.reduce((a, w) => a + w.amount, 0);
+  const roi = r.vp.revenue > 0 ? r2((r.vp.net_income / r.vp.revenue) * 100) : 0;
+  document.getElementById("content").innerHTML = `
+  <div class="kpi-grid">
+    ${kpi("GMV (mercado)", fmtI(r.con.income_executed) + " CUP", "💵", "#EF4444")}
+    ${kpi("Resultado neto VoyPati", fmtI(r.vp.net_income) + " CUP", "🏦", "#8B5CF6")}
+    ${kpi("ROI VoyPati", roi + " %", "📈", "#10B981")}
+    ${kpi("Negocios (neto)", fmtI(r.bizNet) + " CUP", "🏪", "#F59E0B")}
+    ${kpi("Conductores", fmtI(r.drvWallet) + " CUP", "🏍️", "#06B6D4")}
+    ${kpi("Conciliación", r.allOk ? "✔ 4/4" : "✘ " + r.checks.filter(c => c.ok).length + "/4", "⚖️", r.allOk ? "#10B981" : "#EF4444")}
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Estado de resultados — VoyPati</h3><div class="sub">Ingresos por comisiones menos gastos corporativos</div>
+      <table><thead><tr><th>Concepto</th><th class="num">CUP</th></tr></thead><tbody>
+      <tr><td>Ingresos por comisiones (10% negocios + 10% tarifas)</td><td class="num ok">+${fmt(r.vp.revenue)}</td></tr>
+      ${pl("voypati").exp.map(x => `<tr><td>Gasto — ${x.name}</td><td class="num ko">−${fmt(x.natural_balance)}</td></tr>`).join("")}
+      <tr style="font-weight:700;background:#fff9ec"><td>Resultado neto</td><td class="num">${fmt(r.vp.net_income)} CUP</td></tr>
+      <tr><td>ROI (neto / ingresos)</td><td class="num"><b>${roi} %</b></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card"><h3>Resumen por entidad</h3><div class="sub">La realidad contable repartida en todo el ecosistema</div>
+      <table><thead><tr><th>Entidad</th><th class="num">Monto</th></tr></thead><tbody>
+      <tr><td>Mercado — ganancia (win)</td><td class="num">${fmtI(r.con.win)} CUP</td></tr>
+      <tr><td>Negocios — resultado neto</td><td class="num">${fmtI(r.bizNet)} CUP</td></tr>
+      <tr><td>Conductores — billeteras (90% tarifas)</td><td class="num">${fmtI(r.drvWallet)} CUP</td></tr>
+      <tr><td>Facturas de comisión emitidas</td><td class="num">${state.invoices.length} · ${fmtI(invTotal)} CUP</td></tr>
+      <tr><td>Retiros de negocios</td><td class="num">${state.withdrawals.length} · ${fmtI(wdTotal)} CUP</td></tr>
+      <tr style="font-weight:700;background:#fff9ec"><td>Conciliación cruzada</td><td class="num">${r.allOk ? "✔ CUADRA" : "✘ NO"}</td></tr>
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+/* ─── NAVEGACIÓN ─── */
+let currentView = "dashboard";
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll(".menu-item").forEach(m => m.classList.toggle("active", m.dataset.view === v));
+  document.getElementById("pageTitle").textContent = VIEWS[v];
+  render();
+}
+document.querySelectorAll(".menu-item").forEach(m => m.addEventListener("click", () => setView(m.dataset.view)));
+
+function render() {
+  const r = recalc();
+  const views = {
+    dashboard: renderDashboard, ordenes: renderOrdenes, caja: renderCaja, ingresos: renderIngresos,
+    gastos: renderGastos, billetera: renderBilletera, facturas: renderFacturas, consolidado: renderCaja,
+    negocios: renderNegocios, conductores: renderConductores, conciliacion: renderConciliacion,
+    eventos: renderEventos, resumen: renderResumen,
+  };
+  (views[currentView] || renderDashboard)(r);
+  setSteps();
+}
+
+/* init */
+document.getElementById("pageTitle").textContent = "Dashboard";
+setSteps();
+render();
+</script>
+</body>
+</html>
